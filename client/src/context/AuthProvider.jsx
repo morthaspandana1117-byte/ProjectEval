@@ -43,9 +43,10 @@ export function AuthProvider({ children }) {
     [applySession],
   )
 
-  const register = useCallback(
+  // The server assigns the faculty role; the payload is only name, email and password.
+  const registerFaculty = useCallback(
     async (payload) => {
-      const { data } = await api.post('/auth/register', payload)
+      const { data } = await api.post('/auth/register/faculty', payload)
       applySession(data)
       return data.user
     },
@@ -61,8 +62,8 @@ export function AuthProvider({ children }) {
   }, [clearSession])
 
   const value = useMemo(
-    () => ({ ...session, loading: session.status === 'loading', login, register, logout, refresh }),
-    [session, login, register, logout, refresh],
+    () => ({ ...session, loading: session.status === 'loading', login, registerFaculty, logout, refresh }),
+    [session, login, registerFaculty, logout, refresh],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

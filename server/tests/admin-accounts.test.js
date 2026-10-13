@@ -142,22 +142,22 @@ describe("Super Admin seeding", () => {
 
     before(async () => {
       admin = await signIn(ADMIN.ADMIN_EMAIL, "ResetPassw0rd");
-      const reg = await request(app)
-        .post("/api/auth/register")
-        .send({ name: "Self Registered", email: "self@test.edu", password: PASSWORD, rollNumber: "SR001" });
-      assert.equal(reg.status, 201);
-      assertNoSecrets(reg.body, "registration response");
+      const created = await admin
+        .post("/api/admin/users")
+        .send({ name: "Admin Made Student One", email: "self@test.edu", password: PASSWORD, role: "student", rollNumber: "SR001" });
+      assert.equal(created.status, 201);
+      assertNoSecrets(created.body, "create student response");
       student = await signIn("self@test.edu");
       await User.create({ name: "Faculty Member", email: "fac@test.edu", password: PASSWORD, role: "faculty" });
       faculty = await signIn("fac@test.edu");
     });
 
-    test("public registration cannot assign faculty or admin roles", async () => {
-      for (const role of ["faculty", "admin"]) {
+    test("public registration is disabled for every role", async () => {
+      for (const role of ["student", "faculty", "admin"]) {
         const res = await request(app)
           .post("/api/auth/register")
           .send({ name: "Escalator", email: `${role}-escalate@test.edu`, password: PASSWORD, rollNumber: `ESC-${role}`, role });
-        assert.equal(res.status, 400, `role=${role} was accepted`);
+        assert.equal(res.status, 403, `role=${role} was accepted`);
       }
       assert.equal(await User.countDocuments({ email: /escalate/ }), 0);
       assert.equal(await User.countDocuments({ role: "admin" }), 1);

@@ -9,7 +9,7 @@ import { audit } from "../services/audit.js";
 import { deadlineSummary } from "../services/deadlines.js";
 import { getVotingEligibility } from "../services/eligibility.js";
 import { badRequest, forbidden, unauthorized } from "../utils/http.js";
-import { changePasswordSchema, loginSchema, registerSchema } from "../utils/schemas.js";
+import { changePasswordSchema, facultyRegisterSchema, loginSchema } from "../utils/schemas.js";
 
 const router = Router();
 
@@ -26,10 +26,24 @@ async function sessionPayload(user) {
   };
 }
 
-// Self-registration always creates a student. Faculty and admin accounts are created by an admin / seed script.
-router.post("/register", registerLimiter, validateBody(registerSchema), async (req, res) => {
-  const user = await User.create({ ...req.body, role: "student" });
-  await audit(req, "user.register", { actor: user._id, targetType: "User", targetId: user._id, summary: user.email });
+// Student self-registration is disabled: student accounts are created by an admin (POST /api/admin/users)
+// and admin accounts only by the seed script. Nothing is read or created here.
+router.post("/register", registerLimiter, () => {
+  throw forbidden(
+    "Student self-registration is disabled. Your student account is created by the event administrator — ask them for your login details."
+  );
+});
+
+// Faculty self-registration: the role is fixed here and the account is active immediately.
+router.post("/register/faculty", registerLimiter, validateBody(facultyRegisterSchema), async (req, res) => {
+  const { name, email, password } = req.body;
+  const user = await User.create({ name, email, password, role: "faculty", isActive: true });
+  await audit(req, "user.register_faculty", {
+    actor: user._id,
+    targetType: "User",
+    targetId: user._id,
+    summary: `Faculty self-registration: ${user.email}`,
+  });
   issueSession(res, user);
   res.status(201).json(await sessionPayload(user));
 });

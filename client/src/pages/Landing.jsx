@@ -26,7 +26,7 @@ const FEATURES = [
 ]
 
 const STEPS = [
-  { title: 'Register & check in', text: 'Create your student account and get marked present at the venue.' },
+  { title: 'Sign in & check in', text: 'Sign in with the account the administrator created for you and get marked present at the venue.' },
   { title: 'Explore projects', text: 'Browse approved projects, their descriptions and supporting files.' },
   { title: 'Rate & reflect', text: 'Give 1–5 stars and describe what you understood. Update until voting closes.' },
 ]
@@ -41,11 +41,8 @@ export default function Landing() {
             <span className="font-display text-xl font-bold text-white">ProjectEval</span>
           </Link>
           <div className="flex items-center gap-2">
-            <Button as={Link} to="/login" variant="ghost" className="text-white hover:bg-white/10">
+            <Button as={Link} to="/login" variant="accent">
               Sign in
-            </Button>
-            <Button as={Link} to="/register" variant="accent" className="hidden sm:inline-flex">
-              Register
             </Button>
           </div>
         </div>
@@ -67,10 +64,7 @@ export default function Landing() {
               attendance, collect thoughtful ratings and publish trustworthy results.
             </p>
             <div className="mt-10 flex flex-wrap gap-3">
-              <Button as={Link} to="/register" variant="accent" size="lg">
-                Register as a student
-              </Button>
-              <Button as={Link} to="/login" size="lg" variant="secondary" className="border-white/20 bg-white/10 text-white hover:bg-white/20">
+              <Button as={Link} to="/login" variant="accent" size="lg">
                 Sign in
               </Button>
             </div>

@@ -5,9 +5,9 @@ import { GuestOnly, RequireAuth } from './components/RouteGuards.jsx'
 import { PageLoader } from './components/ui.jsx'
 import { useAuth } from './context/contexts.js'
 import Landing from './pages/Landing.jsx'
+import FacultyRegister from './pages/FacultyRegister.jsx'
 import Login from './pages/Login.jsx'
 import NotFound from './pages/NotFound.jsx'
-import Register from './pages/Register.jsx'
 
 const MemberDashboard = lazy(() => import('./pages/MemberDashboard.jsx'))
 const Projects = lazy(() => import('./pages/Projects.jsx'))
@@ -37,7 +37,9 @@ export default function App() {
         <Route element={<GuestOnly />}>
           <Route index element={<Landing />} />
           <Route path="login" element={<Login />} />
-          <Route path="register" element={<Register />} />
+          {/* Student self-registration is disabled; student accounts are created by an administrator. */}
+          <Route path="register" element={<Navigate to="/login" replace />} />
+          <Route path="register/faculty" element={<FacultyRegister />} />
         </Route>
 
         <Route element={<RequireAuth />}>
