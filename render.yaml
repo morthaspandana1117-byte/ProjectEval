@@ -1,0 +1,30 @@
+# Render Blueprint for the ProjectEval API (https://render.com/docs/blueprint-spec)
+services:
+  - type: web
+    name: projecteval-api
+    runtime: node
+    rootDir: server
+    plan: free
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      - key: MONGODB_URI
+        sync: false # paste your Atlas connection string in the Render dashboard
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 1d
+      - key: CLIENT_ORIGIN
+        sync: false # e.g. https://projecteval.vercel.app (comma-separate several)
+      - key: TRUST_PROXY
+        value: "2" # Vercel rewrite + Render proxy; use 1 if browsers call Render directly
+      - key: COOKIE_SAMESITE
+        value: lax
+      - key: EVENT_TIMEZONE
+        value: Asia/Kolkata
