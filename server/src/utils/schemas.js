@@ -32,14 +32,13 @@ export const year = z.coerce.number().int().min(1).max(6);
 
 export const optional = (schema) => z.preprocess(blankToUndefined, schema.optional());
 
-export const registerSchema = z
+// Faculty self-registration: only these three fields. Strict, so `role`, `isActive`, etc. are rejected;
+// the server assigns the faculty role itself.
+export const facultyRegisterSchema = z
   .object({
     name,
     email,
     password,
-    rollNumber,
-    department: optional(department),
-    year: optional(year),
   })
   .strict();
 

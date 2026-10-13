@@ -55,32 +55,34 @@ describe("ProjectEval API", () => {
   });
 
   describe("authentication and roles", () => {
-    test("registration cannot assign a privileged role", async () => {
-      const res = await request(app).post("/api/auth/register").send({
-        name: "Mallory",
-        email: "mallory@college.edu",
-        password: PASSWORD,
-        rollNumber: "21CS999",
-        role: "admin",
-      });
-      assert.equal(res.status, 400);
+    test("public registration is disabled and cannot assign a role", async () => {
+      for (const extra of [{}, { role: "admin" }]) {
+        const res = await request(app).post("/api/auth/register").send({
+          name: "Mallory",
+          email: "mallory@college.edu",
+          password: PASSWORD,
+          rollNumber: "21CS999",
+          ...extra,
+        });
+        assert.equal(res.status, 403);
+        assert.equal(res.headers["set-cookie"], undefined);
+      }
       assert.equal(await User.countDocuments({ email: "mallory@college.edu" }), 0);
     });
 
-    test("students self-register as students and receive a session", async () => {
+    test("admins create student accounts that can sign in", async () => {
       for (const [name, email, rollNumber] of [
         ["Asha Rao", "asha@college.edu", "21CS001"],
         ["Ravi Kumar", "ravi@college.edu", "21CS050"],
         ["Neha Singh", "neha@college.edu", "21CS051"],
       ]) {
-        const agent = request.agent(app);
-        const res = await agent.post("/api/auth/register").send({ name, email, password: PASSWORD, rollNumber });
+        const res = await admin.post("/api/admin/users").send({ name, email, password: PASSWORD, role: "student", rollNumber });
         assert.equal(res.status, 201);
         assert.equal(res.body.user.role, "student");
         assert.equal(res.body.user.password, undefined);
-        const cookie = res.headers["set-cookie"].join(";");
-        assert.match(cookie, /pe_session=.*HttpOnly/i);
       }
+      const login = await request(app).post("/api/auth/login").send({ email: "asha@college.edu", password: PASSWORD });
+      assert.match(login.headers["set-cookie"].join(";"), /pe_session=.*HttpOnly/i);
       presenter = await signIn("asha@college.edu");
       voter = await signIn("ravi@college.edu");
       outsider = await signIn("neha@college.edu");
@@ -88,26 +90,28 @@ describe("ProjectEval API", () => {
     });
 
     test("duplicate email and roll number are rejected", async () => {
-      const res = await request(app).post("/api/auth/register").send({
+      const res = await admin.post("/api/admin/users").send({
         name: "Asha Again",
         email: "ASHA@college.edu",
         password: PASSWORD,
+        role: "student",
         rollNumber: "21CS777",
       });
       assert.equal(res.status, 409);
-      const res2 = await request(app).post("/api/auth/register").send({
+      const res2 = await admin.post("/api/admin/users").send({
         name: "Roll Clash",
         email: "clash@college.edu",
         password: PASSWORD,
+        role: "student",
         rollNumber: "21cs001",
       });
       assert.equal(res2.status, 409);
     });
 
     test("weak passwords and wrong credentials are rejected", async () => {
-      const weak = await request(app)
-        .post("/api/auth/register")
-        .send({ name: "Weak", email: "weak@college.edu", password: "short", rollNumber: "21CS800" });
+      const weak = await admin
+        .post("/api/admin/users")
+        .send({ name: "Weak", email: "weak@college.edu", password: "short", role: "student", rollNumber: "21CS800" });
       assert.equal(weak.status, 400);
       assert.ok(weak.body.errors.password);
       const wrong = await request(app).post("/api/auth/login").send({ email: "ravi@college.edu", password: "nope12345" });

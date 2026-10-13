@@ -212,7 +212,7 @@ export default function Attendance() {
           <EmptyState
             icon={Users}
             title={debounced || status ? 'No matching students' : 'No students registered yet'}
-            description={debounced || status ? 'Adjust the search or status filter.' : 'Students appear here after they register or are added by an administrator.'}
+            description={debounced || status ? 'Adjust the search or status filter.' : 'Students appear here once an administrator adds them.'}
           />
         ) : (
           <>

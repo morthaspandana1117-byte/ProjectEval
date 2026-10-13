@@ -38,14 +38,17 @@ export default function Login() {
   return (
     <AuthLayout
       title="Sign in"
-      subtitle="Use the account issued by your department or the one you registered."
+      subtitle="Use the account created for you by the event administrator."
       footer={
-        <>
-          New student?{' '}
-          <Link to="/register" className="font-semibold text-brand-700 hover:underline">
-            Create an account
-          </Link>
-        </>
+        <div className="space-y-2">
+          <p>
+            Faculty member?{' '}
+            <Link to="/register/faculty" className="font-semibold text-brand-700 hover:underline">
+              Register as Faculty
+            </Link>
+          </p>
+          <p>Students: ask the event administrator to create your account.</p>
+        </div>
       }
     >
       <form onSubmit={handleSubmit} className="space-y-5" noValidate>
