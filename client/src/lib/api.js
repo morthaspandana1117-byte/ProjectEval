@@ -31,21 +31,10 @@ export function getFieldErrors(error) {
   return error?.response?.data?.errors ?? {}
 }
 
-/** Downloads an authenticated file (exports, attachments) and surfaces JSON errors properly. */
-export async function downloadFile(url, fallbackName = 'download') {
+/** Fetches an authenticated file as a Blob (session cookie included) and surfaces JSON errors properly. */
+export async function fetchBlob(url) {
   try {
-    const response = await api.get(url, { responseType: 'blob' })
-    const disposition = response.headers['content-disposition'] ?? ''
-    const match = /filename\*=UTF-8''([^;]+)|filename="?([^";]+)"?/i.exec(disposition)
-    const filename = match ? decodeURIComponent(match[1] ?? match[2]) : fallbackName
-    const href = URL.createObjectURL(response.data)
-    const link = document.createElement('a')
-    link.href = href
-    link.download = filename
-    document.body.appendChild(link)
-    link.click()
-    link.remove()
-    setTimeout(() => URL.revokeObjectURL(href), 1000)
+    return await api.get(url, { responseType: 'blob' })
   } catch (error) {
     const blob = error?.response?.data
     if (blob instanceof Blob) {
@@ -57,4 +46,20 @@ export async function downloadFile(url, fallbackName = 'download') {
     }
     throw error
   }
+}
+
+/** Downloads an authenticated file (exports, attachments). */
+export async function downloadFile(url, fallbackName = 'download') {
+  const response = await fetchBlob(url)
+  const disposition = response.headers['content-disposition'] ?? ''
+  const match = /filename\*=UTF-8''([^;]+)|filename="?([^";]+)"?/i.exec(disposition)
+  const filename = match ? decodeURIComponent(match[1] ?? match[2]) : fallbackName
+  const href = URL.createObjectURL(response.data)
+  const link = document.createElement('a')
+  link.href = href
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  setTimeout(() => URL.revokeObjectURL(href), 1000)
 }
