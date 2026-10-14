@@ -1,5 +1,5 @@
 import { AlertCircle, AlertTriangle, CheckCircle2, ChevronLeft, ChevronRight, Info, Loader2, RefreshCw, X } from 'lucide-react'
-import { useEffect, useId, useRef } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { getErrorMessage } from '../lib/api.js'
 
 const cx = (...classes) => classes.filter(Boolean).join(' ')
@@ -432,8 +432,9 @@ export function ConfirmDialog({ open, title, message, confirmLabel = 'Confirm', 
 }
 
 export function Tabs({ tabs, value, onChange, className }) {
+  // Wraps onto a second row on narrow screens so every tab stays visible.
   return (
-    <div className={cx('inline-flex max-w-full overflow-x-auto rounded-xl bg-slate-100 p-1', className)} role="tablist">
+    <div className={cx('inline-flex max-w-full flex-wrap gap-1 rounded-xl bg-slate-100 p-1', className)} role="tablist">
       {tabs.map((tab) => (
         <button
           key={tab.value}
@@ -454,10 +455,50 @@ export function Tabs({ tabs, value, onChange, className }) {
   )
 }
 
-export function Table({ children, className }) {
+/**
+ * Wide tables scroll inside their own box (never the page). When columns are hidden, edge shadows and
+ * a short hint on small screens make that obvious, and the region is focusable for keyboard scrolling.
+ */
+export function Table({ children, className, label = 'Table' }) {
+  const scrollerRef = useRef(null)
+  const [edges, setEdges] = useState({ start: false, end: false })
+
+  useEffect(() => {
+    const el = scrollerRef.current
+    if (!el) return undefined
+    const update = () => {
+      const start = el.scrollLeft > 1
+      const end = el.scrollLeft + el.clientWidth < el.scrollWidth - 1
+      setEdges((prev) => (prev.start === start && prev.end === end ? prev : { start, end }))
+    }
+    // ResizeObserver reports the initial size too, so no synchronous update is needed here.
+    const observer = new ResizeObserver(update)
+    observer.observe(el)
+    if (el.firstElementChild) observer.observe(el.firstElementChild)
+    el.addEventListener('scroll', update, { passive: true })
+    return () => {
+      observer.disconnect()
+      el.removeEventListener('scroll', update)
+    }
+  }, [])
+
+  const scrollable = edges.start || edges.end
   return (
-    <div className={cx('overflow-x-auto', className)}>
-      <table className="min-w-full divide-y divide-slate-200 text-sm">{children}</table>
+    <div className={cx('relative', className)}>
+      <div
+        ref={scrollerRef}
+        className="overflow-x-auto"
+        {...(scrollable && { tabIndex: 0, role: 'region', 'aria-label': `${label} (scroll sideways for more columns)` })}
+      >
+        <table className="min-w-full divide-y divide-slate-200 text-sm">{children}</table>
+      </div>
+      {edges.start && <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-slate-900/10 to-transparent" />}
+      {edges.end && <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-slate-900/10 to-transparent" />}
+      {scrollable && (
+        <p className="flex items-center justify-center gap-1 border-t border-slate-100 px-4 py-2 text-xs text-slate-500 sm:hidden" aria-hidden>
+          <ChevronLeft className="size-3.5" /> Scroll sideways to see all columns <ChevronRight className="size-3.5" />
+        </p>
+      )}
     </div>
   )
 }

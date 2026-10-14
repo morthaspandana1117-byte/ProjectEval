@@ -136,7 +136,7 @@ export default function Attendance() {
       )}
 
       <Card className="mb-4 p-4">
-        <div className="grid gap-3 md:grid-cols-[12rem_1fr_12rem]">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-[12rem_minmax(0,1fr)_12rem]">
           <Input
             type="date"
             label="Session date"

@@ -123,7 +123,7 @@ export default function Leaderboard() {
                   <Link to={`/projects/${entry.project._id}`} className="font-semibold text-slate-900 hover:text-brand-700">
                     {entry.project.title}
                   </Link>
-                  <p className="mt-0.5 truncate text-xs text-slate-500">
+                  <p className="mt-0.5 text-xs text-slate-500">
                     <span className="font-mono">{entry.project.projectNumber}</span>
                     {entry.project.facultyGuide && ` · Guide: ${entry.project.facultyGuide}`} · {plural(entry.project.teamSize, 'member')}
                   </p>

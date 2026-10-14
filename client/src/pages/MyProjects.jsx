@@ -63,7 +63,7 @@ export default function MyProjects() {
           <Skeleton className="h-28" />
         </div>
       ) : (
-        <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
           <div className="min-w-0 space-y-4">
             {projects.length === 0 ? (
               <Card>

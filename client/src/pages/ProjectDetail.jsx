@@ -321,14 +321,14 @@ export default function ProjectDetail() {
         </Alert>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_22rem]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="min-w-0 space-y-6">
           <Card className="p-5 sm:p-6">
             <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500">Project description</h2>
             <p className="mt-2 whitespace-pre-line leading-relaxed text-slate-800">{project.description || project.abstract}</p>
           </Card>
 
-          <div className="grid gap-6 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <Card>
               <CardHeader title="Team" />
               <ul className="divide-y divide-slate-100">

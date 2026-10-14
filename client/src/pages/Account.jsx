@@ -54,7 +54,7 @@ export default function Account() {
           <CardHeader title="Profile" />
           <dl className="divide-y divide-slate-100">
             {details.map(([label, value]) => (
-              <div key={label} className="grid gap-1 px-5 py-3 sm:grid-cols-3">
+              <div key={label} className="grid grid-cols-1 gap-1 px-5 py-3 sm:grid-cols-3">
                 <dt className="text-sm text-slate-500">{label}</dt>
                 <dd className="text-sm font-medium text-slate-900 sm:col-span-2">{value}</dd>
               </div>
@@ -74,7 +74,7 @@ export default function Account() {
               error={errors.currentPassword}
               required
             />
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <Input
                 label="New password"
                 type="password"

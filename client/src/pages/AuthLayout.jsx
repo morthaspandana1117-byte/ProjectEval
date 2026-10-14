@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 
 export function AuthLayout({ title, subtitle, children, footer }) {
   return (
-    <div className="grid min-h-screen lg:grid-cols-2">
+    <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
       <div className="relative hidden overflow-hidden bg-brand-900 lg:flex lg:flex-col lg:justify-between lg:p-12">
         <div className="pointer-events-none absolute -right-24 -top-24 size-96 rounded-full bg-amber-400/10 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-32 -left-16 size-96 rounded-full bg-brand-500/30 blur-3xl" />

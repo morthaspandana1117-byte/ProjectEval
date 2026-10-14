@@ -126,7 +126,7 @@ function SettingsForm({ initial, initialDeadlines }) {
     <form onSubmit={submit} className="space-y-6" noValidate>
       <Card>
         <CardHeader title="Event" />
-        <div className="grid gap-5 p-5 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 p-5 sm:grid-cols-2">
           <Input label="Event name" value={form.eventName ?? ''} onChange={(e) => set('eventName')(e.target.value)} error={errors.eventName} />
           <Input
             label="Active session date"

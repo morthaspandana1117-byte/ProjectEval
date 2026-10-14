@@ -246,8 +246,8 @@ export default function Reports() {
         />
       )}
       <Alert tone="info" className="mb-4" title="Confidential data">
-        <span className="inline-flex items-center gap-1">
-          <ShieldCheck className="size-4" aria-hidden /> Voter identities and per-person ratings are shown only to administrators. Handle exports carefully.
+        <span className="inline-flex items-start gap-1">
+          <ShieldCheck className="mt-0.5 size-4 shrink-0" aria-hidden /> Voter identities and per-person ratings are shown only to administrators. Handle exports carefully.
         </span>
       </Alert>
       <Tabs

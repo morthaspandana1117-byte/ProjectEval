@@ -102,7 +102,7 @@ export default function AdminDashboard() {
         </Alert>
       )}
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {loading && !s ? (
           [0, 1, 2, 3].map((i) => <Skeleton key={i} className="h-28" />)
         ) : (
@@ -127,7 +127,7 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader title="Voting participation" description="Share of each group that has rated at least one project" />
           <div className="space-y-6 p-5">
@@ -203,7 +203,8 @@ export default function AdminDashboard() {
               <li key={log._id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-5 py-3 text-sm">
                 <ClipboardCheck className="size-4 text-slate-400" aria-hidden />
                 <span className="font-medium text-slate-800">{log.actor?.name ?? 'System'}</span>
-                <span className="min-w-0 flex-1 text-slate-600">{log.summary ?? log.action}</span>
+                {/* Full-width line on phones; shares the row on wider screens. */}
+                <span className="min-w-0 basis-full text-slate-600 sm:basis-0 sm:flex-1">{log.summary ?? log.action}</span>
                 <span className="text-xs text-slate-400">{formatDateTime(log.createdAt)}</span>
               </li>
             ))}
