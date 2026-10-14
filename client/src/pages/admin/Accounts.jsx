@@ -114,7 +114,7 @@ function UserFormModal({ mode, initial, onClose, onSaved }) {
             hint="8+ characters with a letter and a number"
           />
         )}
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {form.role === 'student' ? (
             <Input label="Roll number" required value={form.rollNumber} onChange={set('rollNumber')} error={errors.rollNumber} />
           ) : (

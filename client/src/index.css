@@ -23,6 +23,9 @@
   }
   body {
     @apply bg-slate-50 font-sans text-slate-700 antialiased;
+    /* Long unbroken values (emails, URLs, filenames, titles) wrap at their container's edge instead of
+       widening the page. Does not change min-content sizing, so wide tables still scroll in their own box. */
+    overflow-wrap: break-word;
   }
   h1,
   h2,

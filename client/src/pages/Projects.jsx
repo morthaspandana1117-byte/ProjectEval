@@ -39,7 +39,7 @@ export default function Projects() {
       />
 
       <Card className="mb-6 p-4">
-        <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
           <label className="relative block">
             <span className="sr-only">Search projects</span>
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" aria-hidden />
@@ -67,7 +67,7 @@ export default function Projects() {
           <ErrorState error={error} onRetry={reload} />
         </Card>
       ) : loading && !data ? (
-        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 6 }, (_, i) => (
             <Skeleton key={i} className="h-64" />
           ))}
@@ -82,7 +82,7 @@ export default function Projects() {
         </Card>
       ) : (
         <>
-          <div className={`grid gap-5 sm:grid-cols-2 xl:grid-cols-3 ${loading ? 'opacity-60' : ''}`} aria-busy={loading}>
+          <div className={`grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 ${loading ? 'opacity-60' : ''}`} aria-busy={loading}>
             {data.projects.map((project) => (
               <div key={project._id} className="relative">
                 <ProjectCard project={project} showStatus={isAdmin} />

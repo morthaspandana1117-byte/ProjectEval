@@ -77,7 +77,7 @@ export default function Landing() {
           <p className="text-sm font-semibold uppercase tracking-wider text-amber-600">Why ProjectEval</p>
           <h2 className="mt-2 font-display text-3xl font-bold tracking-tight">Built for academic evaluation days</h2>
         </div>
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {FEATURES.map(({ icon: Icon, title, text }) => (
             <div key={title} className="rounded-2xl border border-slate-200 p-6 transition hover:border-brand-200 hover:shadow-md">
               <div className="inline-flex rounded-xl bg-brand-50 p-2.5 text-brand-700">
@@ -93,7 +93,7 @@ export default function Landing() {
       <section className="border-y border-slate-200 bg-slate-50">
         <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
           <h2 className="font-display text-3xl font-bold tracking-tight">How voting works</h2>
-          <ol className="mt-10 grid gap-8 md:grid-cols-3">
+          <ol className="mt-10 grid grid-cols-1 gap-8 md:grid-cols-3">
             {STEPS.map((step, index) => (
               <li key={step.title} className="flex gap-4">
                 <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand-800 font-display text-lg font-bold text-white">

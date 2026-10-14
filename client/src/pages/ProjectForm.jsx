@@ -241,7 +241,7 @@ function ProjectEditor({ project: initialProject, permissions, deadlines }) {
       <fieldset disabled={!canEditDetails} className="min-w-0 space-y-6">
         <Card>
           <CardHeader title="Project details" />
-          <div className="grid gap-5 p-5 sm:grid-cols-[12rem_1fr]">
+          <div className="grid grid-cols-1 gap-5 p-5 sm:grid-cols-[12rem_minmax(0,1fr)]">
             <Input
               label="Project number"
               required
@@ -299,7 +299,7 @@ function ProjectEditor({ project: initialProject, permissions, deadlines }) {
           <div className="space-y-3 p-5">
             {errors.teamMembers && <p className="text-sm text-rose-600">{errors.teamMembers}</p>}
             {form.teamMembers.map((member, index) => (
-              <div key={index} className="grid items-start gap-3 sm:grid-cols-[1fr_12rem_auto]">
+              <div key={index} className="grid grid-cols-1 items-start gap-3 sm:grid-cols-[minmax(0,1fr)_12rem_auto]">
                 <Input
                   aria-label={`Member ${index + 1} name`}
                   placeholder="Full name"
