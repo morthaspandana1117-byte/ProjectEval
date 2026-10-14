@@ -2,6 +2,7 @@ import {
   ArrowLeft,
   CheckCircle2,
   Download,
+  Eye,
   FileText,
   GraduationCap,
   Lock,
@@ -32,6 +33,7 @@ import {
 import { useAuth, useToast } from '../context/contexts.js'
 import { useAsync } from '../hooks/useAsync.js'
 import { api, downloadFile, getErrorMessage, getFieldErrors } from '../lib/api.js'
+import { previewKind, previewPath } from '../lib/filePreview.js'
 import { formatBytes, formatDateTime, formatRating } from '../lib/format.js'
 
 const FEEDBACK_MIN = 20
@@ -369,6 +371,24 @@ export default function ProjectDetail() {
                       <p className="truncate text-sm font-medium text-slate-800">{file.filename}</p>
                       <p className="text-xs text-slate-500">{formatBytes(file.size)}</p>
                     </div>
+                    {previewKind(file.filename) ? (
+                      <Button
+                        as="a"
+                        href={previewPath(project._id, file._id)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        variant="ghost"
+                        size="sm"
+                        icon={Eye}
+                        aria-label={`View ${file.filename} in a new tab`}
+                      >
+                        View
+                      </Button>
+                    ) : (
+                      <span className="text-xs text-slate-400" title="This file type can't be previewed in the browser. Download it to open it.">
+                        No preview
+                      </span>
+                    )}
                     <Button variant="ghost" size="sm" icon={Download} loading={downloading === file._id} onClick={() => handleDownload(file)}>
                       Download
                     </Button>

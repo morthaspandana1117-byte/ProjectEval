@@ -12,6 +12,7 @@ import NotFound from './pages/NotFound.jsx'
 const MemberDashboard = lazy(() => import('./pages/MemberDashboard.jsx'))
 const Projects = lazy(() => import('./pages/Projects.jsx'))
 const ProjectDetail = lazy(() => import('./pages/ProjectDetail.jsx'))
+const FilePreview = lazy(() => import('./pages/FilePreview.jsx'))
 const ProjectForm = lazy(() => import('./pages/ProjectForm.jsx'))
 const MyProjects = lazy(() => import('./pages/MyProjects.jsx'))
 const MyRatings = lazy(() => import('./pages/MyRatings.jsx'))
@@ -47,6 +48,7 @@ export default function App() {
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="projects" element={<Projects />} />
             <Route path="projects/:id" element={<ProjectDetail />} />
+            <Route path="projects/:id/files/:fileId/preview" element={<FilePreview />} />
             <Route path="leaderboard" element={<Leaderboard />} />
             <Route path="account" element={<Account />} />
 
