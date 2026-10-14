@@ -8,6 +8,7 @@ import Landing from './pages/Landing.jsx'
 import FacultyRegister from './pages/FacultyRegister.jsx'
 import Login from './pages/Login.jsx'
 import NotFound from './pages/NotFound.jsx'
+import StudentRegister from './pages/StudentRegister.jsx'
 
 const MemberDashboard = lazy(() => import('./pages/MemberDashboard.jsx'))
 const Projects = lazy(() => import('./pages/Projects.jsx'))
@@ -38,8 +39,8 @@ export default function App() {
         <Route element={<GuestOnly />}>
           <Route index element={<Landing />} />
           <Route path="login" element={<Login />} />
-          {/* Student self-registration is disabled; student accounts are created by an administrator. */}
-          <Route path="register" element={<Navigate to="/login" replace />} />
+          <Route path="register" element={<Navigate to="/register/student" replace />} />
+          <Route path="register/student" element={<StudentRegister />} />
           <Route path="register/faculty" element={<FacultyRegister />} />
         </Route>
 

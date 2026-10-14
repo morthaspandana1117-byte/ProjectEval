@@ -55,16 +55,17 @@ describe("ProjectEval API", () => {
   });
 
   describe("authentication and roles", () => {
-    test("public registration is disabled and cannot assign a role", async () => {
-      for (const extra of [{}, { role: "admin" }]) {
+    test("public registration cannot assign a privileged role", async () => {
+      for (const role of ["admin", "faculty"]) {
         const res = await request(app).post("/api/auth/register").send({
           name: "Mallory",
           email: "mallory@college.edu",
           password: PASSWORD,
+          confirmPassword: PASSWORD,
           rollNumber: "21CS999",
-          ...extra,
+          role,
         });
-        assert.equal(res.status, 403);
+        assert.equal(res.status, 400);
         assert.equal(res.headers["set-cookie"], undefined);
       }
       assert.equal(await User.countDocuments({ email: "mallory@college.edu" }), 0);

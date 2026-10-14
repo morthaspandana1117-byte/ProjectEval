@@ -9,7 +9,7 @@ import { audit } from "../services/audit.js";
 import { deadlineSummary } from "../services/deadlines.js";
 import { getVotingEligibility } from "../services/eligibility.js";
 import { badRequest, forbidden, unauthorized } from "../utils/http.js";
-import { changePasswordSchema, facultyRegisterSchema, loginSchema } from "../utils/schemas.js";
+import { changePasswordSchema, facultyRegisterSchema, loginSchema, studentRegisterSchema } from "../utils/schemas.js";
 
 const router = Router();
 
@@ -26,24 +26,35 @@ async function sessionPayload(user) {
   };
 }
 
-// Student self-registration is disabled: student accounts are created by an admin (POST /api/admin/users)
-// and admin accounts only by the seed script. Nothing is read or created here.
-router.post("/register", registerLimiter, () => {
-  throw forbidden(
-    "Student self-registration is disabled. Your student account is created by the event administrator — ask them for your login details."
-  );
-});
-
-// Faculty self-registration: the role is fixed here and the account is active immediately.
-router.post("/register/faculty", registerLimiter, validateBody(facultyRegisterSchema), async (req, res) => {
-  const { name, email, password } = req.body;
-  const user = await User.create({ name, email, password, role: "faculty", isActive: true });
-  await audit(req, "user.register_faculty", {
+/**
+ * Creates a self-registered account. The role is always fixed by the calling route (never taken from
+ * the request); admins are only created by the seed script. A duplicate email — including a concurrent
+ * duplicate registration — hits the unique email index (or, for students, the unique roll-number index)
+ * and becomes a 409 in the error handler. `profile` carries explicitly chosen extra fields only.
+ */
+async function createSelfRegisteredUser(req, { name, email, password }, role, profile = {}) {
+  const user = await User.create({ name, email, password, role, isActive: true, ...profile });
+  const label = role === "faculty" ? "Faculty" : "Student";
+  await audit(req, role === "faculty" ? "user.register_faculty" : "user.register", {
     actor: user._id,
     targetType: "User",
     targetId: user._id,
-    summary: `Faculty self-registration: ${user.email}`,
+    summary: `${label} self-registration: ${user.email}`,
   });
+  return user;
+}
+
+// Student self-registration: the student then signs in through the normal login.
+// No attendance record is created, so voting stays locked until an admin marks them present.
+router.post("/register", registerLimiter, validateBody(studentRegisterSchema), async (req, res) => {
+  // The roll number powers the own-project rating check (team members are matched by roll number).
+  const user = await createSelfRegisteredUser(req, req.body, "student", { rollNumber: req.body.rollNumber });
+  res.status(201).json({ message: "Your student account has been created. You can now sign in.", user });
+});
+
+// Faculty self-registration: the account is active immediately and signed in.
+router.post("/register/faculty", registerLimiter, validateBody(facultyRegisterSchema), async (req, res) => {
+  const user = await createSelfRegisteredUser(req, req.body, "faculty");
   issueSession(res, user);
   res.status(201).json(await sessionPayload(user));
 });

@@ -11,7 +11,9 @@ export default function Login() {
   const toast = useToast()
   const navigate = useNavigate()
   const location = useLocation()
-  const [form, setForm] = useState({ email: '', password: '' })
+  // Set by the student registration page so the new account's email is ready to use.
+  const registeredEmail = location.state?.registeredEmail
+  const [form, setForm] = useState({ email: registeredEmail ?? '', password: '' })
   const [errors, setErrors] = useState({})
   const [formError, setFormError] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -38,20 +40,30 @@ export default function Login() {
   return (
     <AuthLayout
       title="Sign in"
-      subtitle="Use the account created for you by the event administrator."
+      subtitle="Sign in with your ProjectEval account."
       footer={
         <div className="space-y-2">
+          <p>
+            New student?{' '}
+            <Link to="/register/student" className="font-semibold text-brand-700 hover:underline">
+              Create a student account
+            </Link>
+          </p>
           <p>
             Faculty member?{' '}
             <Link to="/register/faculty" className="font-semibold text-brand-700 hover:underline">
               Register as Faculty
             </Link>
           </p>
-          <p>Students: ask the event administrator to create your account.</p>
         </div>
       }
     >
       <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+        {registeredEmail && !formError && (
+          <Alert tone="success" title="Your student account is ready">
+            Sign in with your new password to continue. Voting opens for you once the administrator marks you present.
+          </Alert>
+        )}
         {formError && <Alert tone="danger">{formError}</Alert>}
         <Input
           label="College email"
