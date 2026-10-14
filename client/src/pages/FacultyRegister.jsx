@@ -1,9 +1,8 @@
 import { UserPlus } from 'lucide-react'
-import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Alert, Button, Input } from '../components/ui.jsx'
 import { useAuth, useToast } from '../context/contexts.js'
-import { getErrorMessage, getFieldErrors } from '../lib/api.js'
+import { useRegistrationForm } from '../hooks/useRegistrationForm.js'
 import { AuthLayout } from './AuthLayout.jsx'
 
 const EMPTY = { name: '', email: '', password: '' }
@@ -12,42 +11,34 @@ export default function FacultyRegister() {
   const { registerFaculty } = useAuth()
   const toast = useToast()
   const navigate = useNavigate()
-  const [form, setForm] = useState(EMPTY)
-  const [errors, setErrors] = useState({})
-  const [formError, setFormError] = useState('')
-  const [submitting, setSubmitting] = useState(false)
-
-  const update = (field) => (event) => setForm((f) => ({ ...f, [field]: event.target.value }))
-
-  const handleSubmit = async (event) => {
-    event.preventDefault()
-    if (submitting) return
-    setSubmitting(true)
-    setErrors({})
-    setFormError('')
-    try {
-      // Only name, email and password are sent; the server assigns the faculty role.
-      await registerFaculty(form)
+  const { form, update, errors, formError, submitting, handleSubmit } = useRegistrationForm(EMPTY, {
+    // Only name, email and password are sent; the server assigns the faculty role.
+    submit: async (values) => {
+      await registerFaculty(values)
       toast.success('Your faculty account is ready.')
       navigate('/dashboard', { replace: true })
-    } catch (error) {
-      setErrors(getFieldErrors(error))
-      setFormError(getErrorMessage(error))
-      setSubmitting(false)
-    }
-  }
+    },
+  })
 
   return (
     <AuthLayout
       title="Faculty registration"
       subtitle="Create your faculty account with your college email."
       footer={
-        <>
-          Already registered?{' '}
-          <Link to="/login" className="font-semibold text-brand-700 hover:underline">
-            Sign in
-          </Link>
-        </>
+        <div className="space-y-2">
+          <p>
+            Already registered?{' '}
+            <Link to="/login" className="font-semibold text-brand-700 hover:underline">
+              Sign in
+            </Link>
+          </p>
+          <p>
+            Student?{' '}
+            <Link to="/register/student" className="font-semibold text-brand-700 hover:underline">
+              Create a student account
+            </Link>
+          </p>
+        </div>
       }
     >
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>

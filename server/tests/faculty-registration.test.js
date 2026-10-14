@@ -152,12 +152,12 @@ describe("faculty self-registration", () => {
     assert.equal(await User.countDocuments({ role: "admin" }), adminsBefore);
   });
 
-  test("public student registration stays disabled and creates no account", async () => {
-    for (const extra of [{}, { role: "faculty" }, { role: "admin" }]) {
+  test("public student registration can never create a faculty or admin account", async () => {
+    for (const role of ["faculty", "admin"]) {
       const res = await request(app)
         .post("/api/auth/register")
-        .send({ name: "Public Student", email: "public.student@college.edu", password: PASSWORD, rollNumber: "PB001", ...extra });
-      assert.equal(res.status, 403);
+        .send({ name: "Public Student", email: "public.student@college.edu", rollNumber: "PB001", password: PASSWORD, confirmPassword: PASSWORD, role });
+      assert.equal(res.status, 400);
       assert.equal(res.headers["set-cookie"], undefined);
     }
     assert.equal(await User.exists({ email: "public.student@college.edu" }), null);
@@ -203,7 +203,9 @@ describe("faculty self-registration", () => {
     // Rate limiters are skipped under NODE_ENV=test, so confirm the wiring in the route source.
     const source = await readFile(new URL("../src/routes/auth.js", import.meta.url), "utf8");
     assert.match(source, /router\.post\("\/register\/faculty", registerLimiter, validateBody\(facultyRegisterSchema\)/);
-    assert.match(source, /role: "faculty", isActive: true/);
+    // The faculty route passes no extra profile fields, so faculty accounts never get a roll number.
+    assert.match(source, /createSelfRegisteredUser\(req, req\.body, "faculty"\);/);
+    assert.match(source, /User\.create\(\{ name, email, password, role, isActive: true, \.\.\.profile \}\)/);
   });
 
   test("the faculty page has exactly three fields and the login page links to it (static check)", async () => {

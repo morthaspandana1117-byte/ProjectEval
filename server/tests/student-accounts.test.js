@@ -66,17 +66,12 @@ describe("admin-only student accounts", () => {
     await mongo?.stop();
   });
 
-  test("public student registration is disabled and creates no account", async () => {
+  test("public student registration rejects role choices and admin-only fields", async () => {
     const before = await User.countDocuments();
-    const bodies = [
-      { name: "Public Student", email: "public@college.edu", password: PASSWORD, rollNumber: "PB001" },
-      { name: "Public Student", email: "public@college.edu", password: PASSWORD, rollNumber: "PB001", role: "student" },
-      {},
-    ];
-    for (const body of bodies) {
-      const res = await request(app).post("/api/auth/register").send(body);
-      assert.equal(res.status, 403);
-      assert.match(res.body.message, /Student self-registration is disabled/);
+    const base = { name: "Public Student", email: "public@college.edu", rollNumber: "PB001", password: PASSWORD, confirmPassword: PASSWORD };
+    for (const extra of [{ role: "student" }, { role: "admin" }, { year: 2 }, { isActive: false }]) {
+      const res = await request(app).post("/api/auth/register").send({ ...base, ...extra });
+      assert.equal(res.status, 400, JSON.stringify(extra));
       assert.equal(res.headers["set-cookie"], undefined, "no session must be issued");
     }
     assert.equal(await User.countDocuments(), before);
@@ -161,16 +156,10 @@ describe("admin-only student accounts", () => {
     assert.equal((await rate(faculty)).status, 201);
   });
 
-  test("the old student registration URL shows no form and public pages have no student registration links (static check)", async () => {
-    await assert.rejects(access(clientFile("pages/Register.jsx")), "the student registration page should be removed");
+  test("the old /register URL forwards to the student registration page (static check)", async () => {
+    await assert.rejects(access(clientFile("pages/Register.jsx")), "the old admin-era registration page stays removed");
     const app = await readFile(clientFile("App.jsx"), "utf8");
-    assert.match(app, /<Route path="register" element=\{<Navigate to="\/login" replace \/>\} \/>/);
-    assert.ok(!/pages\/Register\.jsx/.test(app));
-    for (const page of ["pages/Login.jsx", "pages/Landing.jsx", "pages/AuthLayout.jsx"]) {
-      const source = await readFile(clientFile(page), "utf8");
-      assert.ok(!/to="\/register"/.test(source), `${page} still links to student registration`);
-    }
-    const auth = await readFile(clientFile("context/AuthProvider.jsx"), "utf8");
-    assert.ok(!auth.includes("'/auth/register'"), "the auth context still calls the student registration endpoint");
+    assert.match(app, /<Route path="register" element=\{<Navigate to="\/register\/student" replace \/>\} \/>/);
+    assert.match(app, /<Route path="register\/student" element=\{<StudentRegister \/>\} \/>/);
   });
 });

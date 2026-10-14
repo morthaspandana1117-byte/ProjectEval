@@ -152,12 +152,12 @@ describe("Super Admin seeding", () => {
       faculty = await signIn("fac@test.edu");
     });
 
-    test("public registration is disabled for every role", async () => {
+    test("public registration never accepts a role from the client", async () => {
       for (const role of ["student", "faculty", "admin"]) {
         const res = await request(app)
           .post("/api/auth/register")
-          .send({ name: "Escalator", email: `${role}-escalate@test.edu`, password: PASSWORD, rollNumber: `ESC-${role}`, role });
-        assert.equal(res.status, 403, `role=${role} was accepted`);
+          .send({ name: "Escalator", email: `${role}-escalate@test.edu`, rollNumber: `ESC-${role}`, password: PASSWORD, confirmPassword: PASSWORD, role });
+        assert.equal(res.status, 400, `role=${role} was accepted`);
       }
       assert.equal(await User.countDocuments({ email: /escalate/ }), 0);
       assert.equal(await User.countDocuments({ role: "admin" }), 1);

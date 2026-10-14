@@ -42,6 +42,24 @@ export const facultyRegisterSchema = z
   })
   .strict();
 
+// Student self-registration: same rules as faculty plus the student roll number (same rule as admin-created
+// students) and a confirmation that must match. Strict, so a client-supplied `role` is rejected;
+// `confirmPassword` is only checked here and never stored.
+export const studentRegisterSchema = z
+  .object({
+    name,
+    email,
+    rollNumber: z.string("Roll number is required").pipe(rollNumber),
+    password,
+    confirmPassword: z.string("Please confirm your password").min(1, "Please confirm your password").max(128),
+  })
+  .strict()
+  .superRefine(({ password: pw, confirmPassword }, ctx) => {
+    if (confirmPassword && pw !== confirmPassword) {
+      ctx.addIssue({ code: "custom", path: ["confirmPassword"], message: "Passwords do not match" });
+    }
+  });
+
 export const loginSchema = z
   .object({
     email,

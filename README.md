@@ -4,7 +4,7 @@ React + Vite + Tailwind CSS frontend (`client/`) and Express + Mongoose API (`se
 
 ## Features
 
-- **Roles:** Admin, Student, Faculty. Students cannot self-register (student accounts are created by an admin); faculty can self-register at `/register/faculty` or be created by an admin; admin accounts only via the seed script. No API lets a user choose their own role.
+- **Roles:** Admin, Student, Faculty. Students can self-register at `/register/student` and faculty at `/register/faculty` (the server assigns the role), or an admin can create either; admin accounts only via the seed script. No API lets a user choose their own role.
 - **Attendance-gated voting:** students vote only when marked **Present** for the active session; faculty vote whenever voting is open; admins never vote.
 - **Projects:** unique project number, title, abstract, description, technologies, team members, faculty guide and up to 5 supporting files (PDF/PNG/JPG/WEBP/DOCX/PPTX, 5 MB each). Admin approval required before a project is visible or rateable. Presenters cannot rate their own project.
 - **Ratings:** 1–5 stars plus required written feedback (20+ characters). One rating per voter per project (unique index); resubmitting updates it.
@@ -42,7 +42,7 @@ npm run seed:admin                              # safe to re-run; never duplicat
 npm run seed:admin -- --reset-password          # deliberately change the admin password
 ```
 
-Admin accounts can only be created by this script. Admins create student and faculty accounts from the **Students & faculty** page (`POST /api/admin/users`). The only public registration is for faculty (`POST /api/auth/register/faculty`, role assigned by the server).
+Admin accounts can only be created by this script. Admins create student and faculty accounts from the **Students & faculty** page (`POST /api/admin/users`). Public registration is available for students (`POST /api/auth/register`, then sign in) and faculty (`POST /api/auth/register/faculty`, signed in immediately); the role is always assigned by the server.
 
 ### Checks
 
@@ -78,7 +78,7 @@ Note: Render free instances sleep after inactivity; the first request can take ~
 
 | Area | Endpoints |
 |---|---|
-| Auth | `POST /api/auth/register/faculty` · `POST /api/auth/login` · `POST /api/auth/logout` · `GET /api/auth/me` · `PATCH /api/auth/password` |
+| Auth | `POST /api/auth/register` · `POST /api/auth/register/faculty` · `POST /api/auth/login` · `POST /api/auth/logout` · `GET /api/auth/me` · `PATCH /api/auth/password` |
 | Projects | `GET /api/projects` · `GET /api/projects/mine` · `GET /api/projects/technologies` · `GET/PATCH/DELETE /api/projects/:id` · `POST /api/projects` · `POST /api/projects/:id/files` · `GET/DELETE /api/projects/:id/files/:fileId` · `GET /api/projects/:id/feedback` · `PUT /api/projects/:id/rating` |
 | Shared | `GET /api/leaderboard?group=student\|faculty` · `GET /api/faculty` · `GET /api/ratings/mine` |
 | Admin | `GET /api/admin/stats` · `/api/admin/users` (CRUD, reset password) · `/api/admin/attendance` (list, bulk mark, sessions, export) · `PATCH /api/admin/projects/:id/status` · `GET /api/admin/projects/:id/ratings` · `/api/admin/reports/voting[/export]` · `/api/admin/reports/participation` · `GET/PATCH /api/admin/settings` · `GET /api/admin/audit-logs` |
