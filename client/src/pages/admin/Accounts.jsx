@@ -22,6 +22,7 @@ import {
 import { useToast } from '../../context/contexts.js'
 import { useAsync } from '../../hooks/useAsync.js'
 import { useDebouncedValue } from '../../hooks/useDebouncedValue.js'
+import { DEPARTMENT_MAX, validateStudentProfile, YEAR_OPTIONS, yearLabel } from '../../lib/academic.js'
 import { api, getErrorMessage, getFieldErrors } from '../../lib/api.js'
 import { formatDateTime, roleLabel } from '../../lib/format.js'
 
@@ -45,8 +46,16 @@ function UserFormModal({ mode, initial, onClose, onSaved }) {
   const isCreate = mode === 'create'
   const set = (field) => (event) => setForm((f) => ({ ...f, [field]: event.target.value }))
 
+  const isStudent = form.role === 'student'
+
   const submit = async (event) => {
     event.preventDefault()
+    // Same Department/Year rules as student self-registration (the server checks again).
+    const profileErrors = isStudent ? validateStudentProfile(form) : {}
+    if (Object.keys(profileErrors).length) {
+      setErrors(profileErrors)
+      return
+    }
     setSaving(true)
     setErrors({})
     try {
@@ -120,14 +129,21 @@ function UserFormModal({ mode, initial, onClose, onSaved }) {
           ) : (
             <Input label="Employee ID" value={form.employeeId} onChange={set('employeeId')} error={errors.employeeId} />
           )}
-          <Input label="Department" value={form.department} onChange={set('department')} error={errors.department} />
+          <Input
+            label="Department"
+            value={form.department}
+            onChange={set('department')}
+            error={errors.department}
+            maxLength={DEPARTMENT_MAX}
+            required={isStudent}
+          />
         </div>
-        {form.role === 'student' && (
-          <Select label="Year" value={form.year ?? ''} onChange={set('year')} error={errors.year}>
-            <option value="">Not specified</option>
-            {[1, 2, 3, 4, 5, 6].map((y) => (
+        {isStudent && (
+          <Select label="Year of study" value={form.year ?? ''} onChange={set('year')} error={errors.year} required>
+            <option value="">Select year</option>
+            {YEAR_OPTIONS.map((y) => (
               <option key={y} value={y}>
-                Year {y}
+                {yearLabel(y)}
               </option>
             ))}
           </Select>

@@ -31,6 +31,8 @@ const studentPayload = (n, overrides = {}) => ({
   email: `student${n}@college.edu`,
   password: PASSWORD,
   role: "student",
+  department: "Computer Science",
+  year: 2,
   rollNumber: `ST${String(n).padStart(3, "0")}`,
   ...overrides,
 });
@@ -68,8 +70,8 @@ describe("admin-only student accounts", () => {
 
   test("public student registration rejects role choices and admin-only fields", async () => {
     const before = await User.countDocuments();
-    const base = { name: "Public Student", email: "public@college.edu", rollNumber: "PB001", password: PASSWORD, confirmPassword: PASSWORD };
-    for (const extra of [{ role: "student" }, { role: "admin" }, { year: 2 }, { isActive: false }]) {
+    const base = { name: "Public Student", email: "public@college.edu", rollNumber: "PB001", department: "CSE", year: 1, password: PASSWORD, confirmPassword: PASSWORD };
+    for (const extra of [{ role: "student" }, { role: "admin" }, { employeeId: "EMP-1" }, { isActive: false }]) {
       const res = await request(app).post("/api/auth/register").send({ ...base, ...extra });
       assert.equal(res.status, 400, JSON.stringify(extra));
       assert.equal(res.headers["set-cookie"], undefined, "no session must be issued");

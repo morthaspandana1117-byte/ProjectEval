@@ -29,6 +29,8 @@ const registration = (overrides = {}) => ({
   name: "Asha Rao",
   email: "asha.rao@college.edu",
   rollNumber: `AUTO${String(++rollSeq).padStart(3, "0")}`,
+  department: "Computer Science",
+  year: 3,
   password: PASSWORD,
   confirmPassword: PASSWORD,
   ...overrides,
@@ -176,7 +178,7 @@ describe("student self-registration", () => {
 
   test("duplicate roll numbers are rejected, including case and spacing variations", async () => {
     // 21CS045 belongs to the first registered student; ST900 to an admin-created student.
-    await admin.post("/api/admin/users").send({ name: "Admin Made", email: "admin.made@college.edu", password: PASSWORD, role: "student", rollNumber: "ST900" });
+    await admin.post("/api/admin/users").send({ name: "Admin Made", email: "admin.made@college.edu", password: PASSWORD, role: "student", rollNumber: "ST900", department: "CSE", year: 2 });
     for (const [i, rollNumber] of ["21CS045", "21cs045", "  21Cs045  ", "st900", " ST900 "].entries()) {
       const res = await request(app).post(ENDPOINT).send(registration({ name: "Roll Clash", email: `rollclash${i}@college.edu`, rollNumber }));
       assert.equal(res.status, 409, rollNumber);
@@ -202,7 +204,7 @@ describe("student self-registration", () => {
 
   test("role, faculty/admin escalation and other unexpected fields are rejected", async () => {
     const adminsBefore = await User.countDocuments({ role: "admin" });
-    const extras = [{ role: "admin" }, { role: "faculty" }, { role: "student" }, { isActive: false }, { tokenVersion: 3 }, { year: 2 }, { department: "CSE" }];
+    const extras = [{ role: "admin" }, { role: "faculty" }, { role: "student" }, { isActive: false }, { tokenVersion: 3 }, { employeeId: "EMP-1" }, { lastLoginAt: "2026-01-01" }];
     for (const [i, extra] of extras.entries()) {
       const res = await request(app).post(ENDPOINT).send(registration({ email: `escalate${i}@college.edu`, ...extra }));
       assert.equal(res.status, 400, JSON.stringify(extra));
@@ -222,7 +224,7 @@ describe("student self-registration", () => {
     const list = await admin.get(`/api/admin/attendance?session=${SESSION}&search=voter@college.edu`);
     assert.equal(list.body.students[0].status, "unmarked");
 
-    const presenter = await admin.post("/api/admin/users").send({ name: "Presenter", email: "presenter@college.edu", password: PASSWORD, role: "student", rollNumber: "PR001" });
+    const presenter = await admin.post("/api/admin/users").send({ name: "Presenter", email: "presenter@college.edu", password: PASSWORD, role: "student", rollNumber: "PR001", department: "CSE", year: 2 });
     const project = await Project.create({
       projectNumber: "SR-1",
       title: "Registration Project",
@@ -246,7 +248,7 @@ describe("student self-registration", () => {
   test("a registered student whose roll number is on a project's team cannot rate it", async () => {
     await Settings.getGlobal();
     await Settings.updateOne({ key: "global" }, { votingOpen: true, activeSession: SESSION });
-    const lead = await admin.post("/api/admin/users").send({ name: "Team Lead", email: "lead@college.edu", password: PASSWORD, role: "student", rollNumber: "TL001" });
+    const lead = await admin.post("/api/admin/users").send({ name: "Team Lead", email: "lead@college.edu", password: PASSWORD, role: "student", rollNumber: "TL001", department: "CSE", year: 2 });
     const project = await Project.create({
       projectNumber: "OWN-1",
       title: "Team Project",
@@ -309,7 +311,7 @@ describe("student self-registration", () => {
     const extra = await request(app).post("/api/auth/register/faculty").send({ name: "Dr. Two", email: "two@college.edu", password: PASSWORD, confirmPassword: PASSWORD });
     assert.equal(extra.status, 400);
 
-    const created = await admin.post("/api/admin/users").send({ name: "Admin Made", email: "made@college.edu", password: PASSWORD, role: "student", rollNumber: "AM001" });
+    const created = await admin.post("/api/admin/users").send({ name: "Admin Made", email: "made@college.edu", password: PASSWORD, role: "student", rollNumber: "AM001", department: "CSE", year: 2 });
     assert.equal(created.status, 201);
     assert.equal((await login("made@college.edu")).res.status, 200);
   });
@@ -322,7 +324,8 @@ describe("student self-registration", () => {
     assert.match(studentPage, /to="\/login"/);
     assert.match(studentPage, /to="\/register\/faculty"/);
     assert.match(facultyPage, /to="\/register\/student"/);
-    assert.equal((studentPage.match(/<Input\b/g) ?? []).length, 5, "full name, email, roll number, password, confirm password");
+    assert.equal((studentPage.match(/<Input\b/g) ?? []).length, 6, "full name, email, roll number, department, password, confirm password");
+    assert.equal((studentPage.match(/<Select\b/g) ?? []).length, 1, "year of study dropdown");
     assert.match(studentPage, /label="Roll number"[\s\S]*?value=\{form\.rollNumber\}[\s\S]*?\brequired\b/);
     assert.match(studentPage, /label="Confirm password"/);
     assert.ok(!/otp|verification code/i.test(studentPage), "no OTP or email verification");

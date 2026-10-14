@@ -48,7 +48,8 @@ async function createSelfRegisteredUser(req, { name, email, password }, role, pr
 // No attendance record is created, so voting stays locked until an admin marks them present.
 router.post("/register", registerLimiter, validateBody(studentRegisterSchema), async (req, res) => {
   // The roll number powers the own-project rating check (team members are matched by roll number).
-  const user = await createSelfRegisteredUser(req, req.body, "student", { rollNumber: req.body.rollNumber });
+  const { rollNumber, department, year } = req.body;
+  const user = await createSelfRegisteredUser(req, req.body, "student", { rollNumber, department, year });
   res.status(201).json({ message: "Your student account has been created. You can now sign in.", user });
 });
 

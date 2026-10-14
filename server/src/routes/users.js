@@ -6,7 +6,7 @@ import Project from "../models/Project.js";
 import Rating from "../models/Rating.js";
 import User from "../models/Users.js";
 import { audit } from "../services/audit.js";
-import { conflict, escapeRegex, forbidden, notFound, paginationMeta, parsePagination } from "../utils/http.js";
+import { badRequest, conflict, escapeRegex, forbidden, notFound, paginationMeta, parsePagination } from "../utils/http.js";
 import { adminCreateUserSchema, adminUpdateUserSchema, resetPasswordSchema, userListQuery } from "../utils/schemas.js";
 
 const router = Router();
@@ -83,6 +83,15 @@ router.patch("/:id", validateBody(adminUpdateUserSchema), async (req, res) => {
   for (const [key, value] of Object.entries(req.body)) {
     if (value === null) user.set(key, undefined);
     else user.set(key, value);
+  }
+
+  // A student's Department and Year can be changed but not cleared. Omitted fields stay as they are,
+  // so older accounts without them can still be updated (e.g. deactivated) without supplying them.
+  if (user.role === "student") {
+    const errors = {};
+    if ("department" in req.body && !user.department) errors.department = "Department is required";
+    if ("year" in req.body && user.year == null) errors.year = "Select a year of study from Year 1 to Year 6";
+    if (Object.keys(errors).length) throw badRequest("Please correct the highlighted fields.", errors);
   }
 
   const roleChanged = user.role !== previousRole;

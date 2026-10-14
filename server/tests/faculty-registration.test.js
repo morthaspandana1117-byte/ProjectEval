@@ -98,7 +98,7 @@ describe("faculty self-registration", () => {
   test("duplicate emails are rejected, including case and spacing variations", async () => {
     await admin
       .post("/api/admin/users")
-      .send({ name: "Existing Student", email: "taken.student@college.edu", password: PASSWORD, role: "student", rollNumber: "TK001" });
+      .send({ name: "Existing Student", email: "taken.student@college.edu", password: PASSWORD, role: "student", rollNumber: "TK001", department: "CSE", year: 2 });
     for (const email of ["kavya.rao@college.edu", "KAVYA.RAO@COLLEGE.EDU", "  Kavya.Rao@college.edu  ", "Taken.Student@College.edu", "ADMIN@fr.edu"]) {
       const res = await request(app).post(ENDPOINT).send({ name: "Someone Else", email, password: PASSWORD });
       assert.equal(res.status, 409, email);
@@ -166,7 +166,7 @@ describe("faculty self-registration", () => {
   test("admins still create student and faculty accounts, and everyone logs in", async () => {
     const student = await admin
       .post("/api/admin/users")
-      .send({ name: "Admin Made Student", email: "made.student@college.edu", password: PASSWORD, role: "student", rollNumber: "MS001" });
+      .send({ name: "Admin Made Student", email: "made.student@college.edu", password: PASSWORD, role: "student", rollNumber: "MS001", department: "CSE", year: 2 });
     assert.equal(student.status, 201);
     const faculty = await admin
       .post("/api/admin/users")

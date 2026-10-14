@@ -144,7 +144,7 @@ describe("Super Admin seeding", () => {
       admin = await signIn(ADMIN.ADMIN_EMAIL, "ResetPassw0rd");
       const created = await admin
         .post("/api/admin/users")
-        .send({ name: "Admin Made Student One", email: "self@test.edu", password: PASSWORD, role: "student", rollNumber: "SR001" });
+        .send({ name: "Admin Made Student One", email: "self@test.edu", password: PASSWORD, role: "student", rollNumber: "SR001", department: "CSE", year: 1 });
       assert.equal(created.status, 201);
       assertNoSecrets(created.body, "create student response");
       student = await signIn("self@test.edu");
@@ -183,6 +183,7 @@ describe("Super Admin seeding", () => {
         role: "student",
         rollNumber: "AM001",
         year: 2,
+        department: "ECE",
       });
       assert.equal(studentRes.status, 201, studentRes.body.message);
       assert.equal(studentRes.body.user.role, "student");

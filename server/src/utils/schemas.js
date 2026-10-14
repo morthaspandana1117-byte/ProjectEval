@@ -27,8 +27,25 @@ const code = (label) =>
 
 export const rollNumber = code("Roll number");
 export const employeeId = code("Employee ID");
-export const department = z.string().trim().max(100);
-export const year = z.coerce.number().int().min(1).max(6);
+// Department is free text (no official list); Year of Study is 1–6, matching the User model (min 1, max 6).
+// The same rules apply to student self-registration and admin-managed student accounts.
+export const DEPARTMENT_MAX = 100;
+export const YEAR_OPTIONS = [1, 2, 3, 4, 5, 6];
+export const department = z.string().trim().max(DEPARTMENT_MAX, `Department must be at most ${DEPARTMENT_MAX} characters`);
+export const studentDepartment = z
+  .string("Department is required")
+  .trim()
+  .min(1, "Department is required")
+  .max(DEPARTMENT_MAX, `Department must be at most ${DEPARTMENT_MAX} characters`);
+const YEAR_MESSAGE = `Select a year of study from Year ${YEAR_OPTIONS[0]} to Year ${YEAR_OPTIONS.at(-1)}`;
+// Accepts 3 or "3" (dropdowns send strings) but not booleans, decimals or other text.
+export const year = z.preprocess(
+  (value) => (typeof value === "string" && /^\s*\d+\s*$/.test(value) ? Number(value) : value),
+  z
+    .number(YEAR_MESSAGE)
+    .int(YEAR_MESSAGE)
+    .refine((value) => YEAR_OPTIONS.includes(value), YEAR_MESSAGE)
+);
 
 export const optional = (schema) => z.preprocess(blankToUndefined, schema.optional());
 
@@ -50,6 +67,8 @@ export const studentRegisterSchema = z
     name,
     email,
     rollNumber: z.string("Roll number is required").pipe(rollNumber),
+    department: studentDepartment,
+    year,
     password,
     confirmPassword: z.string("Please confirm your password").min(1, "Please confirm your password").max(128),
   })
@@ -87,8 +106,16 @@ export const adminCreateUserSchema = z
   })
   .strict()
   .superRefine((value, ctx) => {
-    if (value.role === "student" && !value.rollNumber) {
+    if (value.role !== "student") return;
+    // Students need the same profile fields as self-registered students.
+    if (!value.rollNumber) {
       ctx.addIssue({ code: "custom", path: ["rollNumber"], message: "Roll number is required for students" });
+    }
+    if (!value.department) {
+      ctx.addIssue({ code: "custom", path: ["department"], message: "Department is required" });
+    }
+    if (value.year === undefined) {
+      ctx.addIssue({ code: "custom", path: ["year"], message: YEAR_MESSAGE });
     }
   });
 

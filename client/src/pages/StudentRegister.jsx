@@ -1,17 +1,19 @@
 import { UserPlus } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Alert, Button, Input } from '../components/ui.jsx'
+import { Alert, Button, Input, Select } from '../components/ui.jsx'
 import { useAuth, useToast } from '../context/contexts.js'
 import { useRegistrationForm } from '../hooks/useRegistrationForm.js'
+import { DEPARTMENT_MAX, validateStudentProfile, YEAR_OPTIONS, yearLabel } from '../lib/academic.js'
 import { AuthLayout } from './AuthLayout.jsx'
 
-const EMPTY = { name: '', email: '', rollNumber: '', password: '', confirmPassword: '' }
+const EMPTY = { name: '', email: '', rollNumber: '', department: '', year: '', password: '', confirmPassword: '' }
 
-function validate({ name, email, rollNumber, password, confirmPassword }) {
+function validate({ name, email, rollNumber, department, year, password, confirmPassword }) {
   const errors = {}
   if (!name.trim()) errors.name = 'Full name is required'
   if (!email.trim()) errors.email = 'Email is required'
   if (!rollNumber.trim()) errors.rollNumber = 'Roll number is required'
+  Object.assign(errors, validateStudentProfile({ department, year }))
   if (!password) errors.password = 'Password is required'
   if (!confirmPassword) errors.confirmPassword = 'Please confirm your password'
   else if (password !== confirmPassword) errors.confirmPassword = 'Passwords do not match'
@@ -76,6 +78,25 @@ export default function StudentRegister() {
           maxLength={30}
           required
         />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Input
+            label="Department"
+            value={form.department}
+            onChange={update('department')}
+            error={errors.department}
+            placeholder="e.g. Computer Science"
+            maxLength={DEPARTMENT_MAX}
+            required
+          />
+          <Select label="Year of study" value={form.year} onChange={update('year')} error={errors.year} required>
+            <option value="">Select year</option>
+            {YEAR_OPTIONS.map((y) => (
+              <option key={y} value={y}>
+                {yearLabel(y)}
+              </option>
+            ))}
+          </Select>
+        </div>
         <Input
           label="Password"
           type="password"

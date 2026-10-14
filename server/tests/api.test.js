@@ -77,7 +77,7 @@ describe("ProjectEval API", () => {
         ["Ravi Kumar", "ravi@college.edu", "21CS050"],
         ["Neha Singh", "neha@college.edu", "21CS051"],
       ]) {
-        const res = await admin.post("/api/admin/users").send({ name, email, password: PASSWORD, role: "student", rollNumber });
+        const res = await admin.post("/api/admin/users").send({ name, email, password: PASSWORD, role: "student", rollNumber, department: "CSE", year: 3 });
         assert.equal(res.status, 201);
         assert.equal(res.body.user.role, "student");
         assert.equal(res.body.user.password, undefined);
@@ -97,6 +97,8 @@ describe("ProjectEval API", () => {
         password: PASSWORD,
         role: "student",
         rollNumber: "21CS777",
+        department: "CSE",
+        year: 3,
       });
       assert.equal(res.status, 409);
       const res2 = await admin.post("/api/admin/users").send({
@@ -105,6 +107,8 @@ describe("ProjectEval API", () => {
         password: PASSWORD,
         role: "student",
         rollNumber: "21cs001",
+        department: "CSE",
+        year: 3,
       });
       assert.equal(res2.status, 409);
     });
@@ -112,7 +116,7 @@ describe("ProjectEval API", () => {
     test("weak passwords and wrong credentials are rejected", async () => {
       const weak = await admin
         .post("/api/admin/users")
-        .send({ name: "Weak", email: "weak@college.edu", password: "short", role: "student", rollNumber: "21CS800" });
+        .send({ name: "Weak", email: "weak@college.edu", password: "short", role: "student", rollNumber: "21CS800", department: "CSE", year: 3 });
       assert.equal(weak.status, 400);
       assert.ok(weak.body.errors.password);
       const wrong = await request(app).post("/api/auth/login").send({ email: "ravi@college.edu", password: "nope12345" });
